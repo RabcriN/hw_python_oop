@@ -8,16 +8,20 @@ class InfoMessage:
         self.speed = speed
         self.calories = calories
 
-    def get_message(self):
+    def get_message(self) -> str:
+        edit = list(map(lambda x: "{0:.3f}".format(x), [self.duration,
+                    self.distance, self.speed, self.calories]))
         return (f'Тип тренировки: {self.training_type}; '
-                f'Длительность: {self.duration} ч.; '
-                f'Дистанция: {round(self.distance, 3)} км; '
-                f'Ср. скорость: {self.speed} км/ч; '
-                f'Потрачено ккал: {round(self.calories, 3)}.')
+                f'Длительность: {edit[0]} ч.; '
+                f'Дистанция: {edit[1]} км; '
+                f'Ср. скорость: {edit[2]} км/ч; '
+                f'Потрачено ккал: {edit[3]}.')
 
 
 class Training:
     """Базовый класс тренировки."""
+    LEN_STEP = 0.65
+    M_IN_KM = 1000
 
     def __init__(self,
                  action: int,
@@ -27,8 +31,6 @@ class Training:
         self.action = action
         self.duration = duration
         self.weight = weight
-        self.LEN_STEP = 0.65
-        self.M_IN_KM = 1000
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -59,7 +61,7 @@ class Running(Training):
         coeff_calorie_1 = 18
         coeff_calorie_2 = 20
         return ((coeff_calorie_1 * self.get_mean_speed() - coeff_calorie_2)
-                * self.weight / self.M_IN_KM * self.duration)
+                * self.weight / self.M_IN_KM * (self.duration * 60))
 
 
 class SportsWalking(Training):
@@ -75,17 +77,19 @@ class SportsWalking(Training):
         coeff_calorie_2 = 0.029
         return ((coeff_calorie_1 * self.weight + (self.get_mean_speed()**2
                  // self.height) * coeff_calorie_2 * self.weight)
-                * self.duration)
+                * (self.duration * 60))
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
+
+    LEN_STEP = 1.38
+
     def __init__(self, action: int, duration: float, weight: float,
                  length_pool, count_pool) -> None:
         super().__init__(action, duration, weight)
         self.length_pool = length_pool
         self.count_pool = count_pool
-        self.LEN_STEP = 1.38
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
